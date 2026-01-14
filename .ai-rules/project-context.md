@@ -313,26 +313,80 @@ sql/
 
 ## 开发规范
 
+### ⚠️ 模块包结构规范（重要）
+
+**详见**: `.ai-rules/module-package-structure.md`
+
+**核心架构**（基于实际项目ydcx-admin）:
+```
+项目结构
+├── lf-base              # 基础模块（通用基础类）
+├── lf-modules           # 业务模块容器（按业务领域划分子模块）
+│   └── cn.lf.modules.*, cn.ynlky.modules.*
+├── lf-admin             # 后台管理Controller模块
+├── lf-open-api          # 开放API模块（前台接口）
+└── ruoyi-*              # 若依框架模块
+```
+
+**关键规则**:
+1. **Controller**: 必须放在 `lf-admin` 模块的 `cn.lf.base.controller` 包下
+2. **Domain/Mapper/Service**: 必须放在 `lf-modules` 模块的业务子模块中（如 `cn.lf.modules.ai`）
+3. **按业务领域划分子模块**: 如 `cn.lf.modules.ai`、`cn.ynlky.modules.ydcx_user`
+4. **包名必须与文件路径严格匹配**
+
+**跨模块引用规则**:
+```java
+// lf-admin/controller (引用 lf-modules)
+import cn.lf.modules.ai.domain.AiModel;           // ✅ 引用lf-modules的domain
+import cn.lf.modules.ai.service.IAiModelService;  // ✅ 引用lf-modules的service接口
+
+// lf-modules/service/impl (实现 lf-modules)
+import cn.lf.modules.ai.domain.AiModel;           // ✅ 同模块domain
+import cn.lf.modules.ai.mapper.AiModelMapper;     // ✅ 同模块mapper
+import cn.lf.base.domain.LBaseEntity;             // ✅ 引用lf-base的基础类
+
+// lf-modules/mapper (引用 lf-modules + lf-base)
+import cn.lf.modules.ai.domain.AiModel;           // ✅ 同模块domain
+import cn.lf.base.domain.LBaseEntity;             // ✅ 引用lf-base的基础类
+```
+
+**❌ 常见错误**:
+- 将Controller放在 `lf-modules` 模块（应该在lf-admin）
+- 将Domain/Service放在 `lf-base` 模块（应该在lf-modules的业务子模块）
+- 包名与文件路径不匹配
+
 ### 代码分层规范
 
 **后端分层**:
-1. **Controller层**: 接口控制层
-   - 系统管理: `ruoyi-admin/web/controller/system/`
-   - 业务管理: `lf-base-service/controller/`
-   - OpenAPI前台: `lf-base-service/controller/open_api/`
+1. **Controller层**: 接口控制层（在lf-admin模块）
+   - 系统管理: `ruoyi-admin/web/controller/system/` (若依系统管理)
+   - 业务管理: `lf-admin/src/main/java/cn/lf/base/controller/` (后台业务管理)
+   - OpenAPI前台: `lf-open-api/src/main/java/cn/lf/open_api/controller/` (小程序/H5前台)
 
-2. **Service层**: 业务逻辑层
-   - 接口: `service/I[Entity]Service.java`
-   - 实现: `service/impl/[Entity]ServiceImpl.java`
+2. **Service层**: 业务逻辑层（在lf-modules模块）
+   - 按业务子模块划分: `lf-modules/src/main/java/cn/lf/modules/[业务名]/service/`
+   - 接口: `I[Entity]Service.java`
+   - 实现: `impl/[Entity]ServiceImpl.java`
 
-3. **Mapper层**: 数据访问层
-   - 接口: `mapper/[Entity]Mapper.java`
-   - XML: `resources/mapper/[Entity]Mapper.xml`
+3. **Mapper层**: 数据访问层（在lf-modules模块）
+   - 接口: `lf-modules/src/main/java/cn/lf/modules/[业务名]/mapper/[Entity]Mapper.java`
+   - XML: `lf-modules/src/main/resources/mapper/[Entity]Mapper.xml`
 
-4. **Entity层**: 实体类
-   - 系统实体: `domain/[Entity].java`
-   - 业务实体: `domain/[Entity].java`
+4. **Entity层**: 实体类（在lf-modules模块）
+   - 业务实体: `lf-modules/src/main/java/cn/lf/modules/[业务名]/domain/[Entity].java`
    - 基础实体继承: `LBaseEntity` (lf-base) 或 `BaseEntity` (ruoyi-common)
+
+**示例：AI模型管理模块**
+```
+lf-modules/src/main/java/cn/lf/modules/ai/
+├── domain/AiModel.java              # 实体类
+├── mapper/AiModelMapper.java         # Mapper接口
+├── service/IAiModelService.java      # Service接口
+└── service/impl/AiModelServiceImpl.java  # Service实现
+
+lf-admin/src/main/java/cn/lf/base/controller/
+└── AiModelController.java            # Controller
+```
 
 ### 接口开发规范
 

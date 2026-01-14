@@ -365,6 +365,182 @@ cd ruoyi-ui
 
 ## 常见场景
 
+### 场景0: 创建新功能模块（重要）
+
+**⚠️ 包结构规范**（详见 `.ai-rules/module-package-structure.md`）
+
+**基于实际项目ydcx-admin的正确架构**:
+
+```
+项目模块划分
+├── lf-base          # 基础模块（通用基础类）
+├── lf-modules       # 业务模块容器
+│   └── 按业务领域划分子模块（如cn.lf.modules.ai）
+├── lf-admin         # 后台管理Controller模块
+└── lf-open-api      # 开放API模块
+```
+
+**需求**: 创建一个完整的AI模型管理功能
+
+**正确步骤**:
+
+1. **创建Domain实体类** - 在 `lf-modules` 模块的业务子模块中
+```bash
+# 文件路径
+lf-modules/src/main/java/cn/lf/modules/ai/domain/AiModel.java
+
+# 包名
+package cn.lf.modules.ai.domain;
+```
+
+```java
+package cn.lf.modules.ai.domain;
+
+import cn.lf.base.domain.LBaseEntity;  // ✅ 引用lf-base的基础实体
+import com.baomidou.mybatisplus.annotation.*;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+@TableName("ai_model")
+public class AiModel extends LBaseEntity {
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
+
+    @TableField("model_name")
+    private String modelName;
+}
+```
+
+2. **创建Mapper接口** - 在 `lf-modules` 模块
+```bash
+# 文件路径
+lf-modules/src/main/java/cn/lf/modules/ai/mapper/AiModelMapper.java
+
+# 包名
+package cn.lf.modules.ai.mapper;
+```
+
+```java
+package cn.lf.modules.ai.mapper;
+
+import cn.lf.modules.ai.domain.AiModel;  // ✅ 同模块引用
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+public interface AiModelMapper extends BaseMapper<AiModel> {
+}
+```
+
+3. **创建Service接口** - 在 `lf-modules` 模块
+```bash
+# 文件路径
+lf-modules/src/main/java/cn/lf/modules/ai/service/IAiModelService.java
+
+# 包名
+package cn.lf.modules.ai.service;
+```
+
+```java
+package cn.lf.modules.ai.service;
+
+import cn.lf.modules.ai.domain.AiModel;  // ✅ 同模块引用
+import com.baomidou.mybatisplus.extension.service.IService;
+import java.util.List;
+
+public interface IAiModelService extends IService<AiModel> {
+    List<AiModel> selectAiModelList(AiModel aiModel);
+}
+```
+
+4. **创建Service实现** - 在 `lf-modules` 模块
+```bash
+# 文件路径
+lf-modules/src/main/java/cn/lf/modules/ai/service/impl/AiModelServiceImpl.java
+
+# 包名
+package cn.lf.modules.ai.service.impl;
+```
+
+```java
+package cn.lf.modules.ai.service.impl;
+
+import cn.lf.modules.ai.domain.AiModel;  // ✅ 同模块
+import cn.lf.modules.ai.mapper.AiModelMapper;  // ✅ 同模块
+import cn.lf.modules.ai.service.IAiModelService;  // ✅ 同模块
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AiModelServiceImpl
+    extends ServiceImpl<AiModelMapper, AiModel>
+    implements IAiModelService {
+
+    @Override
+    public List<AiModel> selectAiModelList(AiModel aiModel) {
+        return baseMapper.selectList(null);
+    }
+}
+```
+
+5. **创建Controller** - 在 `lf-admin` 模块（**不在lf-modules！**）
+```bash
+# 文件路径
+lf-admin/src/main/java/cn/lf/base/controller/AiModelController.java
+
+# 包名
+package cn.lf.base.controller;
+```
+
+```java
+package cn.lf.base.controller;
+
+import cn.lf.modules.ai.domain.AiModel;  // ✅ 引用lf-modules的domain
+import cn.lf.modules.ai.service.IAiModelService;  // ✅ 引用lf-modules的service
+import com.ruoyi.common.core.controller.BaseController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+
+@RestController
+@RequestMapping("/service/aiModel")
+public class AiModelController extends BaseController {
+
+    @Resource
+    private IAiModelService aiModelService;  // ✅ 注入lf-modules的service
+
+    @GetMapping("/list")
+    public TableDataInfo list(AiModel aiModel) {
+        startPage();
+        List<AiModel> list = aiModelService.selectAiModelList(aiModel);
+        return getDataTable(list);
+    }
+}
+```
+
+**❌ 常见错误**:
+```
+错误1: Controller放在lf-modules模块
+❌ lf-modules/src/main/java/.../controller/AiModelController.java
+✅ lf-admin/src/main/java/cn/lf/base/controller/AiModelController.java
+
+错误2: Domain/Service放在lf-admin模块
+❌ lf-admin/src/main/java/.../domain/AiModel.java
+✅ lf-modules/src/main/java/cn/lf/modules/ai/domain/AiModel.java
+
+错误3: Domain/Service放在lf-base模块
+❌ lf-base/src/main/java/.../domain/AiModel.java
+✅ lf-modules/src/main/java/cn/lf/modules/ai/domain/AiModel.java
+
+错误4: 包名与路径不匹配
+❌ 文件在com/xxx/，包名声明cn.xxx
+✅ 文件在cn/lf/modules/ai/，包名声明cn.lf.modules.ai
+```
+
+**关键要点**:
+1. **Controller必须在lf-admin模块**
+2. **Domain/Mapper/Service必须在lf-modules的业务子模块中**
+3. **按业务领域划分子模块**，如cn.lf.modules.ai、cn.ynlky.modules.ydcx_user
+4. **包名必须与文件路径严格匹配**
+
 ### 场景1: 开发OpenAPI接口
 
 **需求**: 开发一个获取轮播图的OpenAPI接口

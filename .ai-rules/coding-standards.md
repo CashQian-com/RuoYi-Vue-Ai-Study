@@ -5,14 +5,86 @@
 ### 1. 命名规范
 
 #### 1.1 包名规范
+
+**⚠️ RuoYi-Vue项目专用包结构**（详见 `.ai-rules/module-package-structure.md`）
+
+基于实际项目ydcx-admin的正确架构：
+
 ```
-com.ruoyi.module.[模块名]
-├── domain/         # 实体类
-├── mapper/         # Mapper接口
-│   └── xml/        # Mapper XML
-├── service/        # Service接口
-│   └── impl/       # Service实现
-└── controller/     # Controller（在控制层模块）
+# lf-base 模块（基础模块）
+cn.lf.base/
+├── domain/         # 基础实体类（LBaseEntity等）
+├── annotation/     # 注解
+├── common/         # 通用工具类
+└── config/         # 配置类
+
+# lf-modules 模块（业务模块容器）- 新增！
+cn.lf.modules.[业务名]/
+├── domain/         # ✅ 业务实体类放在这里
+├── mapper/         # ✅ Mapper接口
+├── service/        # ✅ Service接口和实现
+│   └── impl/
+├── dto/            # 数据传输对象
+└── vo/             # 视图对象
+
+cn.ynlky.modules.[业务名]/
+└── ...             # 具体业务子模块（如ydcx_user、ydcx_order等）
+
+# lf-admin 模块（后台管理Controller模块）
+cn.lf.base.controller/
+└── ✅ 所有后台管理Controller放在这里
+
+# lf-open-api 模块（开放API模块）
+cn.lf.open_api.controller/     # 基础OpenAPI
+cn.ynlky.open_api/controller/  # 业务OpenAPI
+```
+
+**包名必须与文件路径严格匹配**:
+
+❌ **错误示例**:
+```
+错误1: Controller放在lf-modules
+❌ lf-modules/src/main/java/.../controller/AiModelController.java
+✅ lf-admin/src/main/java/cn/lf/base/controller/AiModelController.java
+
+错误2: Domain放在lf-admin
+❌ lf-admin/src/main/java/.../domain/AiModel.java
+✅ lf-modules/src/main/java/cn/lf/modules/ai/domain/AiModel.java
+
+错误3: 文件路径与包名不匹配
+❌ 文件在com/xxx/，包名声明cn.xxx
+```
+
+✅ **正确示例**:
+```
+# AI模型管理模块结构
+lf-modules/src/main/java/cn/lf/modules/ai/domain/AiModel.java
+→ package cn.lf.modules.ai.domain;
+
+lf-modules/src/main/java/cn/lf/modules/ai/mapper/AiModelMapper.java
+→ package cn.lf.modules.ai.mapper;
+
+lf-modules/src/main/java/cn/lf/modules/ai/service/IAiModelService.java
+→ package cn.lf.modules.ai.service;
+
+lf-admin/src/main/java/cn/lf/base/controller/AiModelController.java
+→ package cn.lf.base.controller;
+```
+
+**跨模块引用规则**:
+```java
+// Controller在lf-admin，引用lf-modules
+import cn.lf.modules.ai.domain.AiModel;           // ✅ lf-modules的domain
+import cn.lf.modules.ai.service.IAiModelService;  // ✅ lf-modules的service接口
+
+// Service实现在lf-modules，实现lf-modules的接口
+import cn.lf.modules.ai.domain.AiModel;           // ✅ 同模块domain
+import cn.lf.modules.ai.mapper.AiModelMapper;     // ✅ 同模块mapper
+import cn.lf.base.domain.LBaseEntity;             // ✅ 引用lf-base的基础类
+
+// Mapper在lf-modules，引用lf-modules和lf-base
+import cn.lf.modules.ai.domain.AiModel;           // ✅ 同模块domain
+import cn.lf.base.domain.LBaseEntity;             // ✅ 引用lf-base的基础类
 ```
 
 #### 1.2 类名规范
