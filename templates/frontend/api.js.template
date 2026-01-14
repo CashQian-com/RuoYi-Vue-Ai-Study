@@ -1,0 +1,44 @@
+import request from '@/utils/request'
+
+// 查询${tableComment}列表
+export function list${Entity}(query) {
+  return request({
+    url: '/${moduleName}/${entityName}/list',
+    method: 'get',
+    params: query
+  })
+}
+
+// 查询${tableComment}详细
+export function get${Entity}(id) {
+  return request({
+    url: '/${moduleName}/${entityName}/' + id,
+    method: 'get'
+  })
+}
+
+// 新增${tableComment}
+export function add${Entity}(data) {
+  return request({
+    url: '/${moduleName}/${entityName}',
+    method: 'post',
+    data: data
+  })
+}
+
+// 修改${tableComment}
+export function update${Entity}(data) {
+  return request({
+    url: '/${moduleName}/${entityName}',
+    method: 'put',
+    data: data
+  })
+}
+
+// 删除${tableComment}
+export function del${Entity}(id) {
+  return request({
+    url: '/${moduleName}/${entityName}/' + id,
+    method: 'delete'
+  })
+}

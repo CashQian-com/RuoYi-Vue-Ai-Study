@@ -1,0 +1,87 @@
+package com.ruoyi.${module}.service.impl;
+
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.ruoyi.${module}.mapper.${Entity}Mapper;
+import com.ruoyi.${module}.domain.${Entity};
+import com.ruoyi.${module}.service.I${Entity}Service;
+
+/**
+ * ${tableComment}Service业务层处理
+ *
+ * @author ${author}
+ * @date ${date}
+ */
+@Service
+public class ${Entity}ServiceImpl implements I${Entity}Service {
+
+    @Autowired
+    private ${Entity}Mapper ${entityName}Mapper;
+
+    /**
+     * 查询${tableComment}
+     *
+     * @param id ${tableComment}主键
+     * @return ${tableComment}
+     */
+    @Override
+    public ${Entity} select${Entity}ById(Long id) {
+        return ${entityName}Mapper.select${Entity}ById(id);
+    }
+
+    /**
+     * 查询${tableComment}列表
+     *
+     * @param ${entityName} ${tableComment}
+     * @return ${tableComment}
+     */
+    @Override
+    public List<${Entity}> select${Entity}List(${Entity} ${entityName}) {
+        return ${entityName}Mapper.select${Entity}List(${entityName});
+    }
+
+    /**
+     * 新增${tableComment}
+     *
+     * @param ${entityName} ${tableComment}
+     * @return 结果
+     */
+    @Override
+    public int insert${Entity}(${Entity} ${entityName}) {
+        return ${entityName}Mapper.insert${Entity}(${entityName});
+    }
+
+    /**
+     * 修改${tableComment}
+     *
+     * @param ${entityName} ${tableComment}
+     * @return 结果
+     */
+    @Override
+    public int update${Entity}(${Entity} ${entityName}) {
+        return ${entityName}Mapper.update${Entity}(${entityName});
+    }
+
+    /**
+     * 批量删除${tableComment}
+     *
+     * @param ids 需要删除的${tableComment}主键
+     * @return 结果
+     */
+    @Override
+    public int delete${Entity}ByIds(Long[] ids) {
+        return ${entityName}Mapper.delete${Entity}ByIds(ids);
+    }
+
+    /**
+     * 删除${tableComment}信息
+     *
+     * @param id ${tableComment}主键
+     * @return 结果
+     */
+    @Override
+    public int delete${Entity}ById(Long id) {
+        return ${entityName}Mapper.delete${Entity}ById(id);
+    }
+}

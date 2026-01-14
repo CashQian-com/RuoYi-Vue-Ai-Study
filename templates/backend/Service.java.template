@@ -1,0 +1,61 @@
+package com.ruoyi.${module}.service;
+
+import java.util.List;
+import com.ruoyi.${module}.domain.${Entity};
+
+/**
+ * ${tableComment}Service接口
+ *
+ * @author ${author}
+ * @date ${date}
+ */
+public interface I${Entity}Service {
+
+    /**
+     * 查询${tableComment}
+     *
+     * @param id ${tableComment}主键
+     * @return ${tableComment}
+     */
+    public ${Entity} select${Entity}ById(Long id);
+
+    /**
+     * 查询${tableComment}列表
+     *
+     * @param ${entityName} ${tableComment}
+     * @return ${tableComment}集合
+     */
+    public List<${Entity}> select${Entity}List(${Entity} ${entityName});
+
+    /**
+     * 新增${tableComment}
+     *
+     * @param ${entityName} ${tableComment}
+     * @return 结果
+     */
+    public int insert${Entity}(${Entity} ${entityName});
+
+    /**
+     * 修改${tableComment}
+     *
+     * @param ${entityName} ${tableComment}
+     * @return 结果
+     */
+    public int update${Entity}(${Entity} ${entityName});
+
+    /**
+     * 批量删除${tableComment}
+     *
+     * @param ids 需要删除的${tableComment}主键集合
+     * @return 结果
+     */
+    public int delete${Entity}ByIds(Long[] ids);
+
+    /**
+     * 删除${tableComment}信息
+     *
+     * @param id ${tableComment}主键
+     * @return 结果
+     */
+    public int delete${Entity}ById(Long id);
+}
